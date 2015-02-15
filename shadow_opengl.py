@@ -33,6 +33,7 @@ sun_vector_attach = 0
 #variables for communicating with OpenGL
 surfaces = []
 shadows = []
+combined_shadows = []
 normals = []
 colors = []
 
@@ -81,7 +82,7 @@ def reshape(width,height):
     glViewport(0, 0, width, height)
 
 def keyboard(key, x_coord, y_coord):
-    global rotate_model, sun, scale, shadows, sun_vector, surfaces, sun_vector_attach
+    global rotate_model, sun, scale, shadows, sun_vector, surfaces, sun_vector_attach, combined_shadows
     if key == ESCAPE:
         sys.exit()
 
@@ -96,22 +97,22 @@ def keyboard(key, x_coord, y_coord):
     if key == 'a':
         sun[0] = sun[0] + 0.1
         #try full n^2 shadow find
-        shadows, sun_vector, normals = find_shadows(surfaces, sun)
+        shadows, sun_vector, normals, combined_shadows = find_shadows(surfaces, sun)
 
     if key == 's':
         sun[0] = sun[0] - 0.1
         #try full n^2 shadow find
-        shadows, sun_vector, normals = find_shadows(surfaces, sun)
+        shadows, sun_vector, normals, combined_shadows = find_shadows(surfaces, sun)
 
     #move sun tilt?
     if key == 't':
         sun[1] = sun[1] + 0.1
         #try full n^2 shadow find
-        shadows, sun_vector, normals = find_shadows(surfaces, sun)
+        shadows, sun_vector, normals, combined_shadows = find_shadows(surfaces, sun)
     if key == 'y':
         sun[1] = sun[1] - 0.1
         #try full n^2 shadow find
-        shadows, sun_vector, normals = find_shadows(surfaces, sun)
+        shadows, sun_vector, normals, combined_shadows = find_shadows(surfaces, sun)
 
     #zoom?
     if key == '=' or key == '+':
@@ -125,7 +126,7 @@ def keyboard(key, x_coord, y_coord):
         sun_vector_attach = sun_vector_attach + 1
 
 def display():
-    global rotate_count, x, y, surface_normal, sun_vector, rotate_model, scale, surfaces, shadows, normals
+    global rotate_count, x, y, surface_normal, sun_vector, rotate_model, scale, surfaces, shadows, normals, combined_shadows
 
     #viewport
     w = float(glutGet(GLUT_WINDOW_WIDTH))
@@ -192,12 +193,13 @@ def display():
 
         glEnd() #end drawing of points
 
-    color = [1.0,1.0,1.0,1.]
-    glMaterialfv(GL_FRONT,GL_AMBIENT_AND_DIFFUSE,color)
-
     #draw cylinder for sun ray
     #get index to attach
     sindex = sun_vector_attach % num_surfaces
+
+    #color = [1.0,1.0,1.0,1.]
+    glMaterialfv(GL_FRONT,GL_AMBIENT_AND_DIFFUSE,colors[sindex])
+
     s_start = surfaces[sindex][0]
     s_end = np.add(sun_vector, s_start)
     z = np.array([0,0,1])
@@ -275,8 +277,27 @@ def display():
     #print sun data
     sunstring = "Sun azimuth, tilt: "+str(sun[0])+", "+str(sun[1])
     glRasterPos(40.0, cy)
+    cy += 30.0
     for c in sunstring:
         glutBitmapCharacter(GLUT_BITMAP_8_BY_13, ord(c))
+
+    #print shadow percent
+    shadow_area = combined_shadows[sindex].area()
+
+    #find axes on first surface
+    xi, yi = find_axes_in_surface_plane(surfaces[sindex], normals[sindex])
+
+    #find this surfaces points on plane
+    my2d = find_2D_points_in_plane(surfaces[sindex], xi, yi, surfaces[sindex][0])
+
+    surface_area = Polygon(my2d).area()
+
+    #print surface_area, shadow_area, sindex
+    glRasterPos(40.0, cy)
+    areastring = "Shadowed area for surface "+str(sindex+1)+" is "+'%.2f' % (shadow_area/surface_area*100.0)
+    for c in areastring:
+        glutBitmapCharacter(GLUT_BITMAP_8_BY_13, ord(c))
+
 
     glEnable(GL_LIGHTING)
 
@@ -410,13 +431,16 @@ def poly_intersection(first2D, second2D):
     else:
         pintarray = np.array([])
 
-    #return
-    return pintarray
+    #return both numpy and polygon representation
+    return pintarray, pint
 
 #find n^2 shadows
 def find_shadows(surfacesin, sunin):
     #list of lists to save
     shadowsout = []
+
+    #combined poly list
+    combined_shadows_out = []
 
     #find number of surfaces
     num_surfaces = len(surfaces)
@@ -438,6 +462,7 @@ def find_shadows(surfacesin, sunin):
         #if not get next surface
         if cosine_angle <= 0:
             shadowsout.append([])
+            combined_shadows_out.append(Polygon())
             continue
 
         #****here if sunny!****
@@ -449,6 +474,9 @@ def find_shadows(surfacesin, sunin):
 
         #create list
         shadowlist = []
+
+        #create combined polygon
+        combined_shadow = Polygon()
 
         #loop over other surfaces to look for shadows
         for j in range(0,num_surfaces):
@@ -471,11 +499,14 @@ def find_shadows(surfacesin, sunin):
             pons2d = find_2D_points_in_plane(ponsj, xi, yi, surfacesin[i][0])
 
             #do intersection of polygons
-            pintarray = poly_intersection(my2di, pons2d)
+            pintarray, poly = poly_intersection(my2di, pons2d)
 
             if pintarray.shape[0] > 0:
                 #then project final back to 3D
                 shadowi = project_2D_to_plane(pintarray, xi, yi, surfacesin[i][0])
+
+                #and accumulate polygon
+                combined_shadow = combined_shadow | poly
             else:
                 shadowi = np.array([])
 
@@ -485,8 +516,12 @@ def find_shadows(surfacesin, sunin):
         #after loop append shadow list to shadows (list of lists of numpy arrays)
         shadowsout.append(shadowlist)
 
+        #print combined_shadow.area(),i
+        #also append combined polys
+        combined_shadows_out.append(combined_shadow)
+
     #return data
-    return shadowsout, sun_vector, normals
+    return shadowsout, sun_vector, normals, combined_shadows_out
 
 #~~~~main program~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 if __name__ == '__main__':
@@ -524,7 +559,7 @@ if __name__ == '__main__':
     surfaces.append(ns)
 
     #use full n^2 shadow find
-    shadows, sun_vector, normals = find_shadows(surfaces, sun)
+    shadows, sun_vector, normals, combined_shadows = find_shadows(surfaces, sun)
 
     #do OpenGL loop
     init_OpenGL()
