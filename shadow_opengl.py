@@ -218,6 +218,7 @@ def display():
     glRotatef(ang * 180.0/pi, cross[0], cross[1], cross[2])
 
     #draw
+    glutSolidSphere(0.1,10,10)
     quadratic = gluNewQuadric()
     gluCylinder(quadratic, 0.05, 0.05, 1, 10, 10)      # to draw the lateral parts of the cylinder;
 
@@ -297,7 +298,6 @@ def display():
     areastring = "Shadowed area for surface "+str(sindex+1)+" is "+'%.2f' % (shadow_area/surface_area*100.0)
     for c in areastring:
         glutBitmapCharacter(GLUT_BITMAP_8_BY_13, ord(c))
-
 
     glEnable(GL_LIGHTING)
 
@@ -541,7 +541,6 @@ if __name__ == '__main__':
 
     #new test surface
     ns = np.array([[0.0, -1.0, 0.0], [1.0, -1.0, 0.0], [1.0, -1.0, 5.0], [0.66, -1.0, 5.0], [0.66, -1.0, 4.9], [0.33, -1.0, 4.9], [0.33, -1.0, 5.0], [0.0, -1.0, 5.0]])
-
 
     #Sun azimuth/tilt
     sun = np.array([1.7944, 0.9521])
