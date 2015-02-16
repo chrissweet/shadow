@@ -222,16 +222,10 @@ def display():
     quadratic = gluNewQuadric()
     gluCylinder(quadratic, 0.05, 0.05, 1, 10, 10)      # to draw the lateral parts of the cylinder;
 
-    glPopMatrix()
-    #
-    glPushMatrix()
-
     #move
-    glTranslatef(s_end[0],s_end[1],s_end[2])
-    glRotatef(ang * 180.0/pi, cross[0], cross[1], cross[2])
+    glTranslatef(0.0,0.0,1.0)
 
     #draw
-    quadratic = gluNewQuadric()
     gluCylinder(quadratic, 0.1, 0.001, 0.5, 10, 10)      # to draw the lateral parts of the cylinder;
 
     glPopMatrix()
@@ -257,6 +251,32 @@ def display():
 
     #end of 3D draw
     glPopMatrix()
+
+    #draw compass
+    glPushMatrix()
+    color = [1.0,1.0,1.0,1.]
+    glMaterialfv(GL_FRONT,GL_AMBIENT_AND_DIFFUSE,color)
+
+    #move
+    glTranslatef(-5.0,5.0,-3.5)
+    glRotatef(rotate_count,0,0,1)
+    glRotatef(-90.0, 1.0, 0.0, 0.0)
+
+    #draw
+    glutSolidSphere(0.1,10,10)
+    quadratic = gluNewQuadric()
+    gluCylinder(quadratic, 0.05, 0.05, 1, 10, 10)      # to draw the lateral parts of the cylinder;
+
+    #move
+    glTranslatef(0.0,0.0,1.0)
+
+    #draw
+    quadratic = gluNewQuadric()
+    gluCylinder(quadratic, 0.1, 0.001, 0.5, 10, 10)      # to draw the lateral parts of the cylinder;
+
+    glPopMatrix()
+
+    #end of compass
 
     #text printout
     glDisable(GL_LIGHTING)
