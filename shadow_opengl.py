@@ -1,6 +1,3 @@
-from OpenGL.GLUT import *
-from OpenGL.GLU import *
-from OpenGL.GL import *
 import sys
 import numpy as np
 from math import *
@@ -8,6 +5,18 @@ from Polygon import *
 from Polygon.Utils import pointList
 from itertools import permutations
 from random import sample
+
+#flag if OpenGL available on this system
+Opengl_available = True
+
+try:
+    from OpenGL.GLUT import *
+    from OpenGL.GLU import *
+    from OpenGL.GL import *
+    print "OpenGL available."
+except ImportError:
+    opengl_available = False
+    print "OpenGL NOT available!"
 
 ESCAPE = as_8_bit('\033')
 
@@ -43,39 +52,40 @@ sun_vector = np.array([])
 def init_OpenGL():
     global surfaces, colors
 
-    #generate colors
-    num_surfaces = len(surfaces)
-    color_lvl = 8
-    rgb = np.array(list(permutations(range(0,256,color_lvl),3)))/255.0
-    colors = sample(rgb,num_surfaces)
+    if Opengl_available:
+        #generate colors
+        num_surfaces = len(surfaces)
+        color_lvl = 8
+        rgb = np.array(list(permutations(range(0,256,color_lvl),3)))/255.0
+        colors = sample(rgb,num_surfaces)
 
-    glutInit(sys.argv)
-    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH)
-    glutInitWindowSize(600,600)
-    glutCreateWindow(name)
+        glutInit(sys.argv)
+        glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH)
+        glutInitWindowSize(600,600)
+        glutCreateWindow(name)
 
-    glClearColor(0.,0.,0.,1.)
-    glShadeModel(GL_SMOOTH)
+        glClearColor(0.,0.,0.,1.)
+        glShadeModel(GL_SMOOTH)
 
-    #lighting
-    #glEnable(GL_CULL_FACE)
-    glEnable(GL_DEPTH_TEST)
-    glEnable(GL_LIGHTING)
-    lightZeroPosition = [10.,4.,10.,1.]
-    lightZeroColor = [0.8,1.0,0.8,1.0] #green tinged
-    glLightfv(GL_LIGHT0, GL_POSITION, lightZeroPosition)
-    glLightfv(GL_LIGHT0, GL_DIFFUSE, lightZeroColor)
-    glLightfv(GL_LIGHT0, GL_AMBIENT, lightZeroColor)
-    glLightf(GL_LIGHT0, GL_CONSTANT_ATTENUATION, 0.1)
-    glLightf(GL_LIGHT0, GL_LINEAR_ATTENUATION, 0.05)
-    glEnable(GL_LIGHT0)
+        #lighting
+        #glEnable(GL_CULL_FACE)
+        glEnable(GL_DEPTH_TEST)
+        glEnable(GL_LIGHTING)
+        lightZeroPosition = [10.,4.,10.,1.]
+        lightZeroColor = [0.8,1.0,0.8,1.0] #green tinged
+        glLightfv(GL_LIGHT0, GL_POSITION, lightZeroPosition)
+        glLightfv(GL_LIGHT0, GL_DIFFUSE, lightZeroColor)
+        glLightfv(GL_LIGHT0, GL_AMBIENT, lightZeroColor)
+        glLightf(GL_LIGHT0, GL_CONSTANT_ATTENUATION, 0.1)
+        glLightf(GL_LIGHT0, GL_LINEAR_ATTENUATION, 0.05)
+        glEnable(GL_LIGHT0)
 
-    #initialize functions
-    glutKeyboardFunc(keyboard)
-    glutDisplayFunc(display)
-    glutReshapeFunc(reshape)
+        #initialize functions
+        glutKeyboardFunc(keyboard)
+        glutDisplayFunc(display)
+        glutReshapeFunc(reshape)
 
-    glutMainLoop()
+        glutMainLoop()
     return
 
 def reshape(width,height):
