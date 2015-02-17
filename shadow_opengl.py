@@ -71,7 +71,7 @@ class Shadow:
     colors = []
 
     #~~~~Shadow specific~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    #variables for communicating with OpenGL
+    #shadow variables for class
     surfaces = []
     shadows = []
     combined_shadows = []
