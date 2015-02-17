@@ -414,7 +414,7 @@ class Shadow:
     #find actual sun vector from azimuth, tilt
     def calculate_sun_vector(self, sun):
         #get components, subtract model_rotation from it
-        azimuth = sun[0] - self.model_rotation
+        azimuth = sun[0] + self.model_rotation
         tilt = sun[1]
         #sun "direction cosines"
         sv = np.array([sin(azimuth)*cos(tilt), cos(azimuth)*sin(tilt), cos(tilt)])
@@ -660,7 +660,7 @@ if __name__ == '__main__':
     #create class, pass opengl availability
     myshadow = Shadow(Opengl_available)
 
-    #set model rotation
+    #set model rotation, positive is anti-clockwise
     myshadow.set_model_rotation(-0.0)
 
     #Sun azimuth/tilt
