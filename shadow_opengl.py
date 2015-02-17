@@ -18,6 +18,29 @@ except ImportError:
     opengl_available = False
     print "OpenGL NOT available!"
 
+########################################################################################################################
+# Shadow class to calculate shadow geometries for a set of surfaces on a per surface basis
+# Author: Chris Sweet, Center for Research Computing 14th February 2015
+# Notice:
+# Licensee (Greenscale Project at Notre Dame) acknowledges that this is only a limited nonexclusive license
+# for this software.
+# Licensor (The Center for Research Computing) is and remains the owner of all titles, rights, and interests
+# in this Software.
+#
+# Assumtions:
+# 1) The outer surface is ordered counter-clockwise
+# 2) Only outer surfaces are considered for shadowing
+#
+# Main functions:
+# 1) add_surface(numpy array of 3 or more point), Adds a surface to the class, at least two required
+# 2) find_shadows(), finds shadows on a per surface basis, does a full N^2 search
+# 3) get_shadow_ratio(surface number, numpy array defining geometry), get the shadowed ratio of an object on a surface
+# 4) visualize(), launches OpenGL visualization of the structure with shadows
+# 5) set_sun(numpy array with azimuth and tilt of the sun), sets the sun position
+# 6) __init__(boolean for OpenGL available), instantiates with a flag to define if OpenGL is available on the system
+# 7) get_surface_shadow_ratio(surface number), gets the shadowed ratio for a surface
+#
+########################################################################################################################
 class Shadow:
     #~~~~Variables~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     #~~~~OpenGL specific~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
