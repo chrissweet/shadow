@@ -323,7 +323,7 @@ class Shadow:
             glutBitmapCharacter(GLUT_BITMAP_8_BY_13, ord(c))
 
         #print shadow percent
-        ratio = self.get_shadow_ratio(sindex)
+        ratio = self.get_surface_shadow_ratio(sindex)
 
         glRasterPos(40.0, cy)
         areastring = "Shadowed area for surface "+str(sindex+1)+" is "+'%.2f' % (ratio*100.0)
@@ -340,11 +340,9 @@ class Shadow:
         return
 
     #~~~~Routines for shadow calculation~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    #find ratio of shadow to area for surface
-    def get_shadow_ratio(self, sindex):
+    #find ratio of shadow to area for a surface
+    def get_surface_shadow_ratio(self, sindex):
         if len(self.combined_shadows) > sindex:
-            shadow_area = self.combined_shadows[sindex].area()
-
             #find axes on first surface
             xi, yi = self.find_axes_in_surface_plane(self.surfaces[sindex], self.normals[sindex])
 
@@ -352,6 +350,27 @@ class Shadow:
             my2d = self.find_2D_points_in_plane(self.surfaces[sindex], xi, yi, self.surfaces[sindex][0])
 
             surface_area = Polygon(my2d).area()
+
+            shadow_area = self.combined_shadows[sindex].area()
+
+            return shadow_area / surface_area
+        else:
+            return 0.0
+
+    #find ratio of shadow to area for any geometry on a surface (i.e. a window)
+    def get_shadow_ratio(self, sindex, geometry):
+        if len(self.combined_shadows) > sindex:
+            #find axes on first surface
+            xi, yi = self.find_axes_in_surface_plane(self.surfaces[sindex], self.normals[sindex])
+
+            #find this surfaces points on plane
+            my2d = self.find_2D_points_in_plane(geometry, xi, yi, self.surfaces[sindex][0])
+
+            myPoly = Polygon(my2d)
+            surface_area = myPoly.area()
+
+            #get intersection of combined shadow with the geometry
+            shadow_area = (self.combined_shadows[sindex] & myPoly).area()
 
             return shadow_area / surface_area
         else:
@@ -630,6 +649,9 @@ if __name__ == '__main__':
 
     #use full n^2 shadow find
     myshadow.find_shadows()
+
+    #test geometry ratio
+    print "Shadow for 0 ", myshadow.get_shadow_ratio(0, su2)
 
     #do OpenGL loop
     myshadow.visualize()
