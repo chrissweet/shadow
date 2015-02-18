@@ -633,6 +633,7 @@ class Shadow:
         snormal = self.calculate_surface_vector(surf)
         surfangle = atan2(snormal[0],snormal[1])
         self.model_rotation = (surfazimuth * pi) / 180.0 - surfangle
+        #print "Rotation",degrees(self.model_rotation), "degrees,",degrees(surfangle)
 
     #Set model rotation, use Revit/Energy Plus convention of positive->clockwise rotation
     #Direct set method
@@ -674,6 +675,10 @@ if __name__ == '__main__':
     #new test surface
     ns = np.array([[0.0, -1.0, 0.0], [1.0, -1.0, 0.0], [1.0, -1.0, 5.0], [0.66, -1.0, 5.0], [0.66, -1.0, 4.9], [0.33, -1.0, 4.9], [0.33, -1.0, 5.0], [0.0, -1.0, 5.0]])
 
+    #test rotation surface
+    #tr = np.array([[-27.872822, 7.205699, 0.0], [-27.872822, 7.205699, 10.666667], [-9.406634, 17.867157, 10.666667], [-9.406634, 17.867157, 0.0]])
+    #tr = np.array([[-9.406634, 17.867157, 0.0], [-9.406634, 17.867157, 10.666667], [1.254824, -0.599030, 10.666667], [1.254824, -0.599030, 0.0]])
+
     #create class, pass opengl availability
     myshadow = Shadow(Opengl_available)
 
@@ -698,6 +703,9 @@ if __name__ == '__main__':
     #set model rotation after setting surfaces,
     # first argument surface, second reported azimuth in degrees, clockwise positive
     myshadow.set_model_rotation_with_azimuth(su_1,2.0)
+
+    #myshadow.set_model_rotation_with_azimuth(tr,330.0)
+    #myshadow.set_model_rotation_with_azimuth(tr,330.0)
 
     #use full n^2 shadow find
     myshadow.find_shadows()
