@@ -303,7 +303,7 @@ class Shadow:
 
         #move
         glTranslatef(-5.0,5.0,-3.5)
-        glRotatef(self.rotate_count - (self.model_rotation * 180.0 / pi),0,0,1)
+        glRotatef(self.rotate_count + (self.model_rotation * 180.0 / pi),0,0,1)
         glRotatef(-90.0, 1.0, 0.0, 0.0)
 
         #draw
@@ -414,11 +414,13 @@ class Shadow:
     #find actual sun vector from azimuth, tilt
     def calculate_sun_vector(self, sun):
         #get components, subtract model_rotation from it
-        azimuth = sun[0] + self.model_rotation
+        azimuth = sun[0] - self.model_rotation
         tilt = sun[1]
-        #sun "direction cosines"
-        sv = np.array([sin(azimuth)*cos(tilt), cos(azimuth)*sin(tilt), cos(tilt)])
-        sv = sv / np.linalg.norm(sv)
+        #sun "direction cosines", changed cos(tilt) to sin(tilt) in first term
+        sv = np.array([sin(azimuth)*sin(tilt), cos(azimuth)*sin(tilt), cos(tilt)])
+
+        #print np.linalg.norm(sv)
+        #sv = sv / np.linalg.norm(sv)
 
         return sv
 
@@ -618,7 +620,7 @@ class Shadow:
         #return status
         return True
 
-    #set model rotation
+    #set model rotation, use Revit/Energy Plus convention of positive->clockwise rotation
     def set_model_rotation(self, rot):
         self.model_rotation = rot
 
@@ -660,8 +662,8 @@ if __name__ == '__main__':
     #create class, pass opengl availability
     myshadow = Shadow(Opengl_available)
 
-    #set model rotation, positive is anti-clockwise
-    myshadow.set_model_rotation(-0.0)
+    #set model rotation, positive is clockwise
+    myshadow.set_model_rotation(0.0)
 
     #Sun azimuth/tilt
     myshadow.set_sun(np.array([1.7944, 0.9521]))
