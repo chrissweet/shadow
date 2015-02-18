@@ -354,6 +354,13 @@ class Shadow:
         for c in areastring:
             glutBitmapCharacter(GLUT_BITMAP_8_BY_13, ord(c))
 
+        #model rotation
+        cy += 30.0
+        glRasterPos(40.0, cy)
+        rotatestring = "Model rotation "+'%.2f radians.' % self.model_rotation
+        for c in rotatestring:
+            glutBitmapCharacter(GLUT_BITMAP_8_BY_13, ord(c))
+
         glEnable(GL_LIGHTING)
 
         #show it all
@@ -620,7 +627,19 @@ class Shadow:
         #return status
         return True
 
-    #set model rotation, use Revit/Energy Plus convention of positive->clockwise rotation
+    #Set model rotation, use Revit/Energy Plus convention of positive->clockwise rotation
+    #This version uses a surface and its reported azimuth in degrees
+    def set_model_rotation_with_azimuth(self, surfindex, surfazimuth):
+        if surfindex >= len(self.surfaces):
+            return False
+        else:
+            snormal = self.calculate_surface_vector(self.surfaces[surfindex])
+            surfangle = atan2(snormal[0],snormal[1])
+            self.model_rotation = (surfazimuth * pi) / 180.0 - surfangle
+            return True
+
+    #Set model rotation, use Revit/Energy Plus convention of positive->clockwise rotation
+    #Direct set method
     def set_model_rotation(self, rot):
         self.model_rotation = rot
 
@@ -680,11 +699,16 @@ if __name__ == '__main__':
     myshadow.add_surface(su_6)
     myshadow.add_surface(ns)
 
+    #set model rotation after setting surfaces, first argument surface index, second reported azimuth in degrees
+    myshadow.set_model_rotation_with_azimuth(2,2.0)
+
     #use full n^2 shadow find
     myshadow.find_shadows()
 
     #test geometry ratio
     print "Shadow for 0 ", myshadow.get_shadow_ratio(0, su2)
+
+    #print myshadow.normals[2], atan2(myshadow.normals[2][0],myshadow.normals[2][1])
 
     #do OpenGL loop
     myshadow.visualize()
