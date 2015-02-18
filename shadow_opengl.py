@@ -629,14 +629,10 @@ class Shadow:
 
     #Set model rotation, use Revit/Energy Plus convention of positive->clockwise rotation
     #This version uses a surface and its reported azimuth in degrees
-    def set_model_rotation_with_azimuth(self, surfindex, surfazimuth):
-        if surfindex >= len(self.surfaces):
-            return False
-        else:
-            snormal = self.calculate_surface_vector(self.surfaces[surfindex])
-            surfangle = atan2(snormal[0],snormal[1])
-            self.model_rotation = (surfazimuth * pi) / 180.0 - surfangle
-            return True
+    def set_model_rotation_with_azimuth(self, surf, surfazimuth):
+        snormal = self.calculate_surface_vector(surf)
+        surfangle = atan2(snormal[0],snormal[1])
+        self.model_rotation = (surfazimuth * pi) / 180.0 - surfangle
 
     #Set model rotation, use Revit/Energy Plus convention of positive->clockwise rotation
     #Direct set method
@@ -701,7 +697,7 @@ if __name__ == '__main__':
 
     #set model rotation after setting surfaces,
     # first argument surface index, second reported azimuth in degrees, clockwise positive
-    myshadow.set_model_rotation_with_azimuth(2,2.0)
+    myshadow.set_model_rotation_with_azimuth(su_1,2.0)
 
     #use full n^2 shadow find
     myshadow.find_shadows()
