@@ -696,7 +696,7 @@ if __name__ == '__main__':
     myshadow.add_surface(ns)
 
     #set model rotation after setting surfaces,
-    # first argument surface index, second reported azimuth in degrees, clockwise positive
+    # first argument surface, second reported azimuth in degrees, clockwise positive
     myshadow.set_model_rotation_with_azimuth(su_1,2.0)
 
     #use full n^2 shadow find
