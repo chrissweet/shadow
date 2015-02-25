@@ -221,14 +221,20 @@ class Shadow:
         #translate to com
         glTranslatef(-com[0], -com[1], -com[2])
 
+        #get index to attach
+        sindex = self.sun_vector_attach % num_surfaces
+
         #draw the surfaces
         for i in range(0, num_surfaces):
             #set color
             #color = [1.0,0.,0.,1.]
             glMaterialfv(GL_FRONT,GL_AMBIENT_AND_DIFFUSE,self.colors[i])
 
-            #draw surface
-            glBegin(GL_POLYGON) #starts drawing of points
+            #draw surface or loop
+            if len(self.surfaces[i]) <= 4:
+                glBegin(GL_POLYGON) #starts drawing of points
+            else:
+                glBegin(GL_LINE_LOOP) #starts drawing of points
 
             num_pnt = self.surfaces[i].shape[0]
             for j in range(0, num_pnt):
@@ -237,9 +243,6 @@ class Shadow:
             glEnd() #end drawing of points
 
         #draw cylinder for sun ray
-        #get index to attach
-        sindex = self.sun_vector_attach % num_surfaces
-
         #color = [1.0,1.0,1.0,1.]
         glMaterialfv(GL_FRONT,GL_AMBIENT_AND_DIFFUSE,self.colors[sindex])
 
@@ -285,7 +288,10 @@ class Shadow:
             for j in range(0, num_shadows):
                 numpoints = self.shadows[i][j].shape[0]
                 if numpoints > 0:
-                    glBegin(GL_POLYGON) #starts drawing of points
+                    if len(self.shadows[i][j]) <= 4:
+                        glBegin(GL_POLYGON) #starts drawing of points
+                    else:
+                        glBegin(GL_LINE_LOOP) #starts drawing of points
 
                     for k in range(0,numpoints):
                         shadowepsilon = np.add(self.shadows[i][j][k], np.multiply(self.normals[i],0.01))
@@ -705,7 +711,7 @@ if __name__ == '__main__':
     myshadow.set_model_rotation_with_azimuth(su_1,2.0)
 
     #myshadow.set_model_rotation_with_azimuth(tr,330.0)
-    #myshadow.set_model_rotation_with_azimuth(tr,330.0)
+    #myshadow.set_model_rotation_with_azimuth(tr,60.0)
 
     #use full n^2 shadow find
     myshadow.find_shadows()
